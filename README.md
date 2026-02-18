@@ -135,20 +135,20 @@ API_PORT=3001
 ```
 4. Run database migration
 ```nginx
-pnpm prisma migrate dev
+npm prisma migrate dev
 ```
 5. Start the services
 Indexer:
 ```css
-pnpm --filter indexer dev
+npm --filter indexer dev
 ```
 API:
 ```css
-pnpm --filter api dev
+npm --filter api dev
 ```
 Frontend:
 ```css
-pnpm --filter web dev
+npm --filter web dev
 ```
 Open:
 ```arduino
