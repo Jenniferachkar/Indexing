@@ -1,0 +1,34 @@
+datasource db {
+  provider = "sqlite"
+  url = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Transfer {
+  id              Int     @id @default(autoincrement())
+  transactionHash String
+  blockNumber     Int
+  blockTimestamp  Int
+  logIndex        Int
+  tokenAddress    String
+  from            String
+  to              String
+  value           String
+
+  @@unique([transactionHash, logIndex])
+  @@index([from])
+  @@index([to])
+  @@index([tokenAddress])
+  @@index([blockNumber])
+  @@index([transactionHash])
+}
+
+model IndexerState {
+  id                 Int     @id @default(autoincrement())
+  key                String  @unique
+  lastProcessedBlock Int
+  updatedAt          Int
+}
