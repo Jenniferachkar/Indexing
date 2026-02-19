@@ -7,56 +7,69 @@ Workshop: Indexing ERC20 Transfers
 
 ## Overview
 
-This project implements an indexer for the ERC20 `Transfer` event.
+This project implements a production-style indexer for the ERC20 `Transfer` event.
 
-It listens to the standard event: Transfer(address indexed from, address indexed to, uint256 value)
+It listens to the standard Solidity event:
 
-Event Topic : 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+Transfer(address indexed from, address indexed to, uint256 value)
 
+Event Topic:
 
-The goal is to:
+0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+
+The objective of this project is to:
 
 - Index historical Transfer events
 - Listen to new events in real time
 - Store them in a database
 - Expose a REST API for querying
-- Provide basic monitoring and a simple UI
+- Provide monitoring endpoints
 
 ---
 
-## Architecture
+# Architecture
 
-The system is composed of three parts:
+The system is composed of three main components:
 
-### 1. Indexer
+## 1️) Indexer
 
 The indexer:
 
 - Connects to an Ethereum RPC provider (Infura / Alchemy)
 - Fetches historical logs using `eth_getLogs`
 - Listens to new logs via WebSocket
-- Handles reconnection in case of errors
+- Handles reconnection in case of failure
 - Stores events in the database
 - Saves the last processed block to allow resume after restart
+- Ensures idempotency using `(transactionHash, logIndex)` uniqueness
+
+It supports:
+
+- Backfill mode
+- Real-time mode
+- Safe restart without duplicate entries
 
 ---
 
-### 2. API
+## 2️) API
 
-The API exposes:
+The REST API exposes:
 
-- `GET /transfers`  
-  Query indexed transfers with filters
+### GET `/health`
+Returns service status.
 
-- `GET /stream`  
-  Live updates using Server-Sent Events (SSE)
+### GET `/transfers`
+Query indexed transfers with filters.
 
-- `GET /metrics`  
-  Prometheus-compatible metrics endpoint
+### GET `/stream`
+Live updates using Server-Sent Events (SSE).
+
+### GET `/metrics`
+Prometheus-compatible metrics endpoint.
 
 ---
 
-### 3. Database
+## 3️) Database
 
 SQLite database using Prisma ORM.
 
@@ -68,11 +81,15 @@ Tables:
 Constraints:
 
 - Unique `(transactionHash, logIndex)`
-- Indexed fields: `from`, `to`, `tokenAddress`, `blockNumber`
+- Indexed fields:
+  - `from`
+  - `to`
+  - `tokenAddress`
+  - `blockNumber`
 
 ---
 
-## Data Model
+# Data Model
 
 ```ts
 interface TransferEvent {
@@ -87,44 +104,63 @@ interface TransferEvent {
 }
 ```
 ---
-## API Usage
-Example query
+# API Usage
+
+## Example
+
 ```bash
-GET /transfers?sender=0x123...&fromBlock=5000000&limit=20
+GET http://localhost:3001/transfers?sender=0x123...&fromBlock=5000000&limit=20
 ```
-Available filters:
-- sender
-- receiver
-- token
-- txHash
-- blockNumber
-- fromBlock
-- toBlock
-- minValue
-- maxValue
-- limit
-- offset
+---
+## Available Filters
+
+- `sender`
+- `receiver`
+- `token`
+- `txHash`
+- `blockNumber`
+- `fromBlock`
+- `toBlock`
+- `minValue`
+- `maxValue`
+- `limit`
+- `offset`
+
 ---
 
-## Installation
-Requirements
+# Installation
+
+## Requirements
+
 - Node.js 20+
-- PNPM
+- npm
 - Ethereum RPC provider (Infura or Alchemy)
 
-1. Clone the repository
+---
+
+## 1️⃣ Clone the repository
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/indexing.git
-cd indexing
+git clone https://github.com/Jenniferachkar/Indexing.git
+cd Indexing
 ```
-2. Install dependencies
+
+---
+
+## 2️⃣ Install dependencies
+
 ```bash
 npm install
 ```
-3. Configure environment
-Create a .env file
+
+---
+
+## 3️⃣ Configure environment
+
+Create a `.env` file at the root of the project:
+
 ```ini
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="file:./prisma/dev.db"
 
 RPC_HTTP_URL="https://sepolia.infura.io/v3/YOUR_KEY"
 RPC_WS_URL="wss://sepolia.infura.io/ws/v3/YOUR_KEY"
@@ -133,30 +169,70 @@ START_BLOCK=0
 CONFIRMATIONS=3
 API_PORT=3001
 ```
-4. Run database migration
-```nginx
-npm prisma migrate dev
-```
-5. Start the services
-Indexer:
-```css
-npm --filter indexer dev
-```
-API:
-```css
-npm --filter api dev
-```
-Frontend:
-```css
-npm --filter web dev
-```
-Open:
-```arduino
-http://localhost:3000
-```
+
 ---
-## License 
+
+## 4️⃣ Run database migration
+
+```bash
+npx prisma migrate dev
+```
+
+### Optional (reset database)
+
+```bash
+npx prisma migrate reset
+```
+
+---
+
+## 5️⃣ Start the services
+
+### Start Indexer
+
+```bash
+npm run dev:indexer
+```
+
+or
+
+```bash
+npx tsx src/indexer/indexer.ts
+```
+
+---
+
+### Start API
+
+```bash
+npm run dev:api
+```
+
+or
+
+```bash
+npx tsx src/api/server.ts
+```
+
+---
+
+## Access the API
+
+```
+http://localhost:3001/health
+```
+
+---
+
+# Monitoring
+
+- `/health` → service status  
+- `/metrics` → Prometheus metrics  
+- `/stream` → live Transfer events  
+
+---
+
+# License
+
 MIT
-
-
 
