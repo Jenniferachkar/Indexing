@@ -172,7 +172,7 @@ API_PORT=3001
 
 ---
 
-## 4️⃣ Run database migration
+## 4️) Run database migration
 
 ```bash
 npx prisma migrate dev
@@ -186,7 +186,7 @@ npx prisma migrate reset
 
 ---
 
-## 5️⃣ Start the services
+## 5️) Start the services
 
 ### Start Indexer
 
