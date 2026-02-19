@@ -138,7 +138,7 @@ GET http://localhost:3001/transfers?sender=0x123...&fromBlock=5000000&limit=20
 
 ---
 
-## 1️⃣ Clone the repository
+## 1️) Clone the repository
 
 ```bash
 git clone https://github.com/Jenniferachkar/Indexing.git
@@ -147,7 +147,7 @@ cd Indexing
 
 ---
 
-## 2️⃣ Install dependencies
+## 2️) Install dependencies
 
 ```bash
 npm install
@@ -155,7 +155,7 @@ npm install
 
 ---
 
-## 3️⃣ Configure environment
+## 3️) Configure environment
 
 Create a `.env` file at the root of the project:
 
